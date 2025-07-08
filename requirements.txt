@@ -1,0 +1,8 @@
+aiogram==2.25.2
+APScheduler==3.10.4
+aiohttp==3.8.6
+requests==2.31.0
+openai==1.30.1
+psycopg2-binary==2.9.9
+SQLAlchemy==1.4.52
+python-dotenv==1.0.1
