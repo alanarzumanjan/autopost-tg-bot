@@ -1,7 +1,7 @@
 from .session import SessionLocal
 from .models import Post
 
-def get_sheduled_post():
+def get_scheduled_post():
     db = SessionLocal()
     try:
         post = db.query(Post).filter_by(published=False).order_by(Post.scheduled_for.asc()).first()
@@ -9,7 +9,7 @@ def get_sheduled_post():
     finally:
         db.close()
 
-def mark_post_as_publiched(post_id: int):
+def mark_post_as_published(post_id: int):
     db = SessionLocal()
     try:
         post = db.query(Post).get(post_id)
