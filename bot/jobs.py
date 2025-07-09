@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from bot.services.publisher import publish_scheduled_post
+from bot.publisher import publish_scheduled_post
 
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler()
@@ -12,5 +12,5 @@ def setup_scheduler(bot):
         kwargs={"bot": bot},
         name="Daily post publishing"
     )
-    
+
     scheduler.start()

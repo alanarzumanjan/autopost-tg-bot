@@ -5,7 +5,7 @@ from bot.handlers.start import register_start_handler
 from bot.db.models import Post
 from bot.db.session import Base, engine
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from bot.scheduler.jobs import setup_scheduler
+from bot.jobs import setup_scheduler
 
 logging.basicConfig(level=logging.INFO)
 
