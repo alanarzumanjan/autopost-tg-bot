@@ -5,6 +5,7 @@ from bot.handlers.start import register_start_handler
 from bot.db.models import Post
 from bot.db.session import Base, engine
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from bot.scheduler.jobs import setup_scheduler
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,6 +16,7 @@ dp = Dispatcher(bot, storage=storage)
 register_start_handler(dp)
 
 if __name__ == "__main__":
+    setup_scheduler(bot) # start planning
     executor.start_polling(dp, skip_updates=True)
 
 Base.metadata.create_all(bind=engine)
