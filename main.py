@@ -1,6 +1,6 @@
 import logging
 from aiogram import Bot, Dispatcher, executor
-from bot.comfig import BOT_TOKEN
+from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
 
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
