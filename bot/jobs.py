@@ -6,12 +6,28 @@ from pytz import timezone
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler()
 
-    # Every day in time post
+    # First post in Morning
     scheduler.add_job(
         publish_scheduled_post,
-        CronTrigger(hour=19, minute=33,timezone=timezone("Europe/Moscow")),
+        CronTrigger(hour=9, minute=00,timezone=timezone("Europe/Moscow")),
         kwargs={"bot": bot},
-        name="Daily post publishing"
+        name="Morning post"
     )
 
+    # Second post in Evening
+    scheduler.add_job(
+        publish_scheduled_post,
+        CronTrigger(hour=19, minute=30,timezone=timezone("Europe/Moscow")),
+        kwargs={"bot": bot},
+        name="Evening post"
+    )
+
+    # Test
+    scheduler.add_job(
+        publish_scheduled_post,
+        CronTrigger(hour=22, minute=28,timezone=timezone("Europe/Moscow")),
+        kwargs={"bot": bot},
+        name="Morning post"
+    )
+    
     scheduler.start()

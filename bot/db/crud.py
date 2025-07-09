@@ -22,12 +22,18 @@ def mark_post_as_published(post_id: int):
 def add_post(title: str, content: str, scheduled_for=None, is_ai_generated=True):
     db = SessionLocal()
     try:
+        if scheduled_for and scheduled_for.tzinfo is None:
+            scheduled_for = scheduled_for.replace(tzinfo=timezone.utc)
+        elif scheduled_for and scheduled_for.tzinfo:
+            scheduled_for = scheduled_for.astimezone(timezone.utc)
+
         new_post = Post(
             title=title,
             content=content,
-            scheduled_for=scheduled_for,
+            scheduled_for=scheduled_for.replace(tzinfo=None) if scheduled_for else None,  # в БД хранится без tz
             is_ai_generated=is_ai_generated
         )
+        
         db.add(new_post)
         db.commit()
         db.refresh(new_post)
