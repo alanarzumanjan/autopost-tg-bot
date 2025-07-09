@@ -1,2 +1,5 @@
 .env
 /venv
+/bot/__pycache__
+/bot/handlers/__pycache__
+/bot/db/__pycache__
