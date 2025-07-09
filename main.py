@@ -18,5 +18,3 @@ register_start_handler(dp)
 if __name__ == "__main__":
     setup_scheduler(bot) # start planning
     executor.start_polling(dp, skip_updates=True)
-
-Base.metadata.create_all(bind=engine)
