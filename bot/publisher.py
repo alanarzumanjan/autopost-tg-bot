@@ -1,19 +1,39 @@
 from aiogram import Bot
-from bot.db.crud import get_scheduled_post, mark_post_as_published
-from datetime import datetime, timezone
+from bot.db.crud import get_scheduled_post, mark_post_as_published, add_post
+from datetime import datetime
+from bot.generator import generate_post
 
 CHANNEL_ID = -1002768447325
 
+
 async def publish_scheduled_post(bot: Bot):
     print("🕓 Задача публикации запущена...")
+
     post = get_scheduled_post()
+
     if not post:
-        print(f"📦 Найден пост: {post.title if post else 'нет поста'}")
-        return
-    
+        print("📭 В базе нет готового поста. Пробуем сгенерировать...")
+        try:
+            content = await generate_post(bot=bot)
+        except Exception as e:
+            print(f"❌ Ошибка при обращении к OpenAI: {e}")
+            return
+        
+        if content:
+            post = add_post(
+                title="AI Generated Post",
+                content=content,
+                scheduled_for=datetime.utcnow(),
+                is_ai_generated=True
+            )
+            print("✅ Пост успешно сгенерирован и сохранён.")
+        else:
+            print("❌ Не удалось сгенерировать пост (пустой ответ).")
+            return
+
     should_post = False
     if not post.scheduled_for:
-         should_post = True
+        should_post = True
     else:
         now = datetime.utcnow()
         scheduled_naive = post.scheduled_for.replace(tzinfo=None)
@@ -21,13 +41,13 @@ async def publish_scheduled_post(bot: Bot):
         print(f"⏱ scheduled_for = {scheduled_naive}, now = {now}, ready = {should_post}")
     
     if should_post:
-            try:
-                message = f"📝 {post.title}\n\n{post.content}"
-                print("📨 Отправка сообщения в канал...")
-                await bot.send_message(CHANNEL_ID, message)
-                mark_post_as_published(post.id)
-                print(f"📝 Post {post.title} is published!")
-            except Exception as e:
-                print(f"❌ Error in sending post: {e}")
+        try:
+            message = f"📝 {post.title}\n\n{post.content}"
+            print("📨 Отправка сообщения в канал...")
+            await bot.send_message(CHANNEL_ID, message)
+            mark_post_as_published(post.id)
+            print(f"✅ Пост опубликован: {post.title}")
+        except Exception as e:
+            print(f"❌ Ошибка отправки поста: {e}")
     else:
-         print("⏳ Время публикации ещё не наступило.")
+        print("⏳ Время публикации ещё не наступило.")

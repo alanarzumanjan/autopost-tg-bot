@@ -1,8 +1,10 @@
+import asyncio
 import openai
 from random import choice, choices, random
+from datetime import datetime
 from topic_lists import growth_topics, business_topics, tech_topics, team_topics, tools_topics
-from bot.config import OPENAI_API_KEY
-
+from bot.config import OPENAI_API_KEY, ADMIN_ID
+from aiogram import Bot
 openai.api_key = OPENAI_API_KEY
 
 all_topic_groups = {
@@ -26,7 +28,7 @@ def pick_weighted_random_topic():
     group = all_topic_groups[group_name]
     return random.choice(group)
 
-async def generate_post(topic: str = None) -> str:
+async def generate_post(topic: str = None, bot: Bot = None) -> str:
     if topic is None:
         topic = pick_weighted_random_topic()
     
@@ -45,29 +47,50 @@ async def generate_post(topic: str = None) -> str:
     - Приводи конкретику (кейсы, цифры, реальных проектов или эффектов).
     - Используй эмодзи уместно, не перегружай.
     - Обязательно закончить фразой, а не на середине.
+
+    Оформи пост красиво:
+    - Заголовок с эмодзи, **жирным**
+    - Абзацы по 2–3 предложения
+    - Выделяй *термины* и **важные мысли**
+    - Если подходит — используй маркированные списки
     """
 
-    try:
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Ты Telegram-бот для делового канала. Пиши умно, чётко, с пользой."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.8,
-            max_tokens=600
-        )
+    for attempt in range(3):  # maximum 3 tryes
+        try:
+            response = await openai.ChatCompletion.acreate(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "Ты Telegram-бот для делового канала. Пиши умно, чётко, с пользой."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.8,
+                max_tokens=600
+            )
 
-        content = response.choices[0].message.content.strip()
-        tokens = response.usage.total_tokens
-        print(f"\n📊 Потрачено токенов: {tokens}")
+            content = response.choices[0].message.content.strip()
+            tokens = response.usage.total_tokens
+            now = datetime.utcnow().isoformat()
 
-        with open("generation_log.txt", "a", encoding="utf-8") as log_file:
-            log_file.write(f"{topic} | {tokens} токенов\n")
+            print(f"\n📊 Потрачено токенов: {tokens}")
+            with open("generation_log.txt", "a", encoding="utf-8") as log_file:
+                log_file.write(f"{now} | {topic} | {tokens} токенов\n{content}\n{'-'*60}\n")
 
-        return content
-    
-    except Exception as e:
-        print(f"Ошибка генерации поста: {e}")
-        return None
-    
+            return content
+
+        except Exception as e:
+            error_type = type(e).__name__
+            now = datetime.utcnow().isoformat()
+            log_msg = f"[{now}] Ошибка генерации (попытка {attempt+1}) — {error_type}: {e}"
+            print(f"⚠️ {log_msg}")
+
+            with open("errors.log", "a", encoding="utf-8") as error_log:
+                error_log.write(log_msg + "\n")
+
+            if bot:
+                await bot.send_message(ADMIN_ID, f"❗Ошибка генерации поста:\n`{log_msg}`", parse_mode="Markdown")
+
+            if attempt == 0:
+                print("🔁 Повторная попытка через 5 секунд...")
+                await asyncio.sleep(5)
+
+    return None
