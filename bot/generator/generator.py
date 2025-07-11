@@ -1,12 +1,35 @@
 import openai
+from random import choice, choices, random
+from topic_lists import growth_topics, business_topics, tech_topics, team_topics, tools_topics
 from bot.config import OPENAI_API_KEY
-from random import random
-
-topic_list = []
 
 openai.api_key = OPENAI_API_KEY
 
-async def generate_post(topic: str = "продуктивность") -> str:
+all_topic_groups = {
+    "growth": growth_topics,
+    "business": business_topics,
+    "tech": tech_topics,
+    "team": team_topics,
+    "tools": tools_topics
+}
+
+topic_weights = {
+    "growth": 0.4,
+    "business": 0.25,
+    "tech": 0.15,
+    "team": 0.1,
+    "tools": 0.1
+}
+
+def pick_weighted_random_topic():
+    group_name = choices(list(topic_weights.keys()), weights=topic_weights.values())[0]
+    group = all_topic_groups[group_name]
+    return random.choice(group)
+
+async def generate_post(topic: str = None) -> str:
+    if topic is None:
+        topic = pick_weighted_random_topic()
+    
     prompt = f"""
     Ты — Telegram-бот, который публикует короткие и полезные посты на тему "{topic}". 
     Цель поста — дать читателю конкретную интересную/полезную идею, факт, приём или навык, который он может запомнить, обсудить или применить.
@@ -34,7 +57,16 @@ async def generate_post(topic: str = "продуктивность") -> str:
             temperature=0.8,
             max_tokens=600
         )
-        return response.choices[0].message.content.strip()
+
+        content = response.choices[0].message.content.strip()
+        tokens = response.usage.total_tokens
+        print(f"\n📊 Потрачено токенов: {tokens}")
+
+        with open("generation_log.txt", "a", encoding="utf-8") as log_file:
+            log_file.write(f"{topic} | {tokens} токенов\n")
+
+        return content
+    
     except Exception as e:
         print(f"Ошибка генерации поста: {e}")
         return None
