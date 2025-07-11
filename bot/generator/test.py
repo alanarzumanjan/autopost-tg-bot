@@ -1,8 +1,8 @@
 import asyncio
-from bot.generator import generate_post
+from generator import generate_post
 
 async def main():
-    text = await generate_post("технологии")
+    text = await generate_post()
     print("Сгенерированный пост:\n")
     print(text)
 
