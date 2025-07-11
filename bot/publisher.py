@@ -1,7 +1,7 @@
 from aiogram import Bot
 from bot.db.crud import get_scheduled_post, mark_post_as_published, add_post
 from datetime import datetime
-from bot.generator import generate_post
+from bot.generator.generator import generate_post
 
 CHANNEL_ID = -1002768447325
 
