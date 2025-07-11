@@ -1,8 +1,8 @@
 import asyncio
 import openai
-from random import choice, choices, random
+import random
 from datetime import datetime
-from topic_lists import growth_topics, business_topics, tech_topics, team_topics, tools_topics
+from .topic_lists import growth_topics, business_topics, tech_topics, team_topics, tools_topics
 from bot.config import OPENAI_API_KEY, ADMIN_ID
 from aiogram import Bot
 openai.api_key = OPENAI_API_KEY
@@ -24,7 +24,7 @@ topic_weights = {
 }
 
 def pick_weighted_random_topic():
-    group_name = choices(list(topic_weights.keys()), weights=topic_weights.values())[0]
+    group_name = random.choices(list(topic_weights.keys()), weights=topic_weights.values())[0]
     group = all_topic_groups[group_name]
     return random.choice(group)
 
@@ -41,6 +41,7 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
     - Раскрой идею с примером (6-10 предложений, по делу)
     - Заверши выводом или призывом к размышлению. Если есть чему научиться,
         то приведи конкретные примеры как что поможет, что советуешь делать/сделать кратко из зачем (1–4 предложения)
+    - Не пиши слова типа: "Заголовок", "Водная часть", "Заключение", "Ответ"
 
     Обязательно:
     - Будь живым и энергичным в стиле, избегай шаблонов и общих слов, живо, без штампов. Можно чуть дерзко, с характером.

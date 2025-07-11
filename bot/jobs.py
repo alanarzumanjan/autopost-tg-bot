@@ -17,7 +17,7 @@ def setup_scheduler(bot):
     # Second post in Evening
     scheduler.add_job(
         publish_scheduled_post,
-        CronTrigger(hour=19, minute=30,timezone=timezone("Europe/Moscow")),
+        CronTrigger(hour=19, minute=57,timezone=timezone("Europe/Moscow")),
         kwargs={"bot": bot},
         name="Evening post"
     )
@@ -25,9 +25,23 @@ def setup_scheduler(bot):
     # Test
     scheduler.add_job(
         publish_scheduled_post,
-        CronTrigger(hour=19, minute=19,timezone=timezone("Europe/Moscow")),
+        CronTrigger(hour=19, minute=44,timezone=timezone("Europe/Moscow")),
         kwargs={"bot": bot},
-        name="Morning post"
+        name="Test post"
     )
     
+    scheduler.add_job(
+        publish_scheduled_post,
+        CronTrigger(hour=20, minute=2,timezone=timezone("Europe/Moscow")),
+        kwargs={"bot": bot},
+        name="Test post"
+    )
+
+    scheduler.add_job(
+        publish_scheduled_post,
+        CronTrigger(hour=20, minute=6,timezone=timezone("Europe/Moscow")),
+        kwargs={"bot": bot},
+        name="Test post"
+    )
+
     scheduler.start()
