@@ -2,9 +2,16 @@ import asyncio
 import openai
 import random
 from datetime import datetime
-from .topic_lists import growth_topics, business_topics, tech_topics, team_topics, tools_topics
+from .topic_lists import (
+    growth_topics,
+    business_topics,
+    tech_topics,
+    team_topics,
+    tools_topics,
+)
 from bot.config import OPENAI_API_KEY, ADMIN_ID
 from aiogram import Bot
+
 openai.api_key = OPENAI_API_KEY
 
 all_topic_groups = {
@@ -12,7 +19,7 @@ all_topic_groups = {
     "business": business_topics,
     "tech": tech_topics,
     "team": team_topics,
-    "tools": tools_topics
+    "tools": tools_topics,
 }
 
 topic_weights = {
@@ -20,18 +27,22 @@ topic_weights = {
     "business": 0.25,
     "tech": 0.15,
     "team": 0.1,
-    "tools": 0.1
+    "tools": 0.1,
 }
 
+
 def pick_weighted_random_topic():
-    group_name = random.choices(list(topic_weights.keys()), weights=topic_weights.values())[0]
+    group_name = random.choices(
+        list(topic_weights.keys()), weights=topic_weights.values()
+    )[0]
     group = all_topic_groups[group_name]
     return random.choice(group)
+
 
 async def generate_post(topic: str = None, bot: Bot = None) -> str:
     if topic is None:
         topic = pick_weighted_random_topic()
-    
+
     prompt = f"""
     Ты — Telegram-бот, который публикует короткие и полезные посты на тему "{topic}". 
     Цель поста — дать читателю конкретную интересную/полезную идею, факт, приём или навык, который он может запомнить, обсудить или применить.
@@ -42,6 +53,7 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
     - Заверши выводом или призывом к размышлению. Если есть чему научиться,
         то приведи конкретные примеры как что поможет, что советуешь делать/сделать кратко из зачем (1–4 предложения)
     - Не пиши слова типа: "Заголовок", "Водная часть", "Заключение", "Ответ"
+    - Если где-то уместно вставить сыллку на дополнительный ресурс для чтения/просмотра - вставляй
 
     Обязательно:
     - Будь живым и энергичным в стиле, избегай шаблонов и общих слов, живо, без штампов. Можно чуть дерзко, с характером.
@@ -50,9 +62,9 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
     - Обязательно закончить фразой, а не на середине.
 
     Оформи пост красиво:
-    - Заголовок с эмодзи, **жирным**
+    - Заголовок с эмодзи, жирным
     - Абзацы по 2–3 предложения
-    - Выделяй *термины* и **важные мысли**
+    - Выделяй термины и важные мысли в соотвествии с телеграмм разметкой 
     - Если подходит — используй маркированные списки
     """
 
@@ -61,11 +73,14 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
             response = await openai.ChatCompletion.acreate(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "Ты Telegram-бот для делового канала. Пиши умно, чётко, с пользой."},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "Ты Telegram-бот для делового канала. Пиши умно, чётко, с пользой.",
+                    },
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.8,
-                max_tokens=600
+                max_tokens=600,
             )
 
             content = response.choices[0].message.content.strip()
@@ -74,21 +89,29 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
 
             print(f"\n📊 Потрачено токенов: {tokens}")
             with open("generation_log.txt", "a", encoding="utf-8") as log_file:
-                log_file.write(f"{now} | {topic} | {tokens} токенов\n{content}\n{'-'*60}\n")
+                log_file.write(
+                    f"{now} | {topic} | {tokens} токенов\n{content}\n{'-' * 60}\n"
+                )
 
             return content
 
         except Exception as e:
             error_type = type(e).__name__
             now = datetime.utcnow().isoformat()
-            log_msg = f"[{now}] Ошибка генерации (попытка {attempt+1}) — {error_type}: {e}"
+            log_msg = (
+                f"[{now}] Ошибка генерации (попытка {attempt + 1}) — {error_type}: {e}"
+            )
             print(f"⚠️ {log_msg}")
 
             with open("errors.log", "a", encoding="utf-8") as error_log:
                 error_log.write(log_msg + "\n")
 
             if bot:
-                await bot.send_message(ADMIN_ID, f"❗Ошибка генерации поста:\n`{log_msg}`", parse_mode="Markdown")
+                await bot.send_message(
+                    ADMIN_ID,
+                    f"❗Ошибка генерации поста:\n`{log_msg}`",
+                    parse_mode="Markdown",
+                )
 
             if attempt == 0:
                 print("🔁 Повторная попытка через 5 секунд...")
