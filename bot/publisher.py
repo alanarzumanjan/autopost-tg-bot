@@ -2,8 +2,24 @@ from aiogram import Bot
 from bot.db.crud import get_scheduled_post, mark_post_as_published, add_post
 from datetime import datetime
 from bot.generator.generator import generate_post
+import re
 
 from bot.config import CHANNEL_ID
+
+
+def clean_markdown(text: str) -> str:
+    text = text.replace("\xa0", " ")
+    text = text.replace("\u200b", "")
+    text = text.replace("\u202f", " ")
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def clean_html(text: str) -> str:
+    # Telegram НЕ поддерживает <p>, <br>, <ul>, <li> и т.п.
+    text = re.sub(r"</?p>", "", text)
+    text = re.sub(r"</?br\s*/?>", "\n", text)
+    return text.strip()
 
 
 async def publish_scheduled_post(bot: Bot):
@@ -44,9 +60,9 @@ async def publish_scheduled_post(bot: Bot):
 
     if should_post:
         try:
-            message = f"{post.content}"
+            cleaned = clean_html(post.content)
             print("📨 Отправка сообщения в канал...")
-            await bot.send_message(CHANNEL_ID, message)
+            await bot.send_message(CHANNEL_ID, cleaned, parse_mode="HTML")
             mark_post_as_published(post.id)
             print(f"✅ Пост опубликован: {post.title}")
         except Exception as e:

@@ -1,4 +1,5 @@
 .env
+generation_log.txt
 /venv
 /bot/__pycache__
 /bot/handlers/__pycache__
