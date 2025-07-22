@@ -16,6 +16,6 @@ dp = Dispatcher(bot, storage=storage)
 register_start_handler(dp)
 
 if __name__ == "__main__":
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)  # init db
     setup_scheduler(bot)  # start planning
-    executor.start_polling(dp, skip_updates=True)
+    # executor.start_polling(dp, skip_updates=True)
