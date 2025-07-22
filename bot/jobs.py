@@ -34,7 +34,7 @@ def setup_scheduler(bot):
     # Test
     scheduler.add_job(
         publish_scheduled_post,
-        CronTrigger(hour=1, minute=20, timezone=timezone("Europe/Moscow")),
+        CronTrigger(hour=1, minute=32, timezone=timezone("Europe/Moscow")),
         kwargs={"bot": bot},
         name="Evening post",
     )
