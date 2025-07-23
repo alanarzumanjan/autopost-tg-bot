@@ -1,10 +1,12 @@
 import logging
 import threading
 import os
+import asyncio
 
 from flask import Flask
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.utils.executor import set_webhook
 
 from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
@@ -34,7 +36,19 @@ dp = Dispatcher(bot, storage=storage)
 register_start_handler(dp)
 
 if __name__ == "__main__":
-    threading.Thread(target=run_http).start()  # HTTP сервер
-    Base.metadata.create_all(bind=engine)  # Создание таблиц
-    setup_scheduler(bot)  # Планировщик
-    executor.start_polling(dp, skip_updates=True)  # Запуск бота
+    logging.info("🚀 Starting HTTP ping server...")
+    threading.Thread(target=run_http).start()
+
+    logging.info("📦 Initializing database...")
+    Base.metadata.create_all(bind=engine)
+
+    logging.info("🕰️ Launching scheduler...")
+    setup_scheduler(bot)
+
+    logging.info("🤖 Bot is starting...")
+    asyncio.get_event_loop().run_until_complete(bot.delete_webhook())
+
+    try:
+        executor.start_polling(dp, skip_updates=True)
+    except Exception as e:
+        logging.critical(f"❌ Bot crashed with error: {e}")
