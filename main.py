@@ -1,18 +1,17 @@
 import logging
-import asyncio
-from aiogram import Bot, Dispatcher, executor
-from bot.config import BOT_TOKEN
-from bot.handlers.start import register_start_handler
-from bot.db.models import Post
-from bot.db.session import Base, engine
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from bot.jobs import setup_scheduler
 import threading
-from flask import Flask
 import os
 
-PORT = int(os.environ.get("PORT", 10000))
+from flask import Flask
+from aiogram import Bot, Dispatcher, executor
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from bot.config import BOT_TOKEN
+from bot.handlers.start import register_start_handler
+from bot.db.session import Base, engine
+from bot.jobs import setup_scheduler
+
+PORT = int(os.environ.get("PORT", 10000))
 app = Flask(__name__)
 
 
@@ -34,17 +33,8 @@ dp = Dispatcher(bot, storage=storage)
 
 register_start_handler(dp)
 
-
-async def main():
-    # Создание таблиц в БД
-    Base.metadata.create_all(bind=engine)
-
-    # Запуск планировщика
-    setup_scheduler(bot)
-
-    await dp.start_polling(bot, drop_pending_updates=True)
-
-
 if __name__ == "__main__":
-    threading.Thread(target=run_http).start()
-    asyncio.run(main())
+    threading.Thread(target=run_http).start()  # HTTP сервер
+    Base.metadata.create_all(bind=engine)  # Создание таблиц
+    setup_scheduler(bot)  # Планировщик
+    executor.start_polling(dp, skip_updates=True)  # Запуск бота
