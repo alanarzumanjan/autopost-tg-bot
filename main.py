@@ -7,6 +7,7 @@ from flask import Flask
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils.executor import set_webhook
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
@@ -14,7 +15,9 @@ from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
 
 PORT = int(os.environ.get("PORT", 10000))
+
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
 @app.route("/")
@@ -24,7 +27,7 @@ def ping():
 
 
 def run_http():
-    app.run(host="0.0.0.0", port=PORT)
+    app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False)
 
 
 logging.basicConfig(level=logging.INFO)
