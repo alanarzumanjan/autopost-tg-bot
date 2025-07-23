@@ -4,10 +4,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN python --version
-RUN python -m venv venv
-RUN source venv/bin/activate
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /app/venv
+RUN /app/venv/bin/pip install --upgrade pip
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "main.py"]
+CMD ["/app/venv/bin/python", "main.py"]
