@@ -14,10 +14,13 @@ from bot.handlers.start import register_start_handler
 from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
 
-PORT = int(os.environ.get("PORT", 10000))
-
 app = Flask(__name__)
+
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+PORT = int(os.environ.get("PORT", 10000))
 
 
 @app.route("/")
@@ -27,6 +30,7 @@ def ping():
 
 
 def run_http():
+    logging.info("🚀 Starting HTTP server...")
     app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False)
 
 
@@ -39,19 +43,23 @@ dp = Dispatcher(bot, storage=storage)
 register_start_handler(dp)
 
 if __name__ == "__main__":
-    logging.info("🚀 Starting HTTP ping server...")
-    threading.Thread(target=run_http).start()
+    threading.Thread(target=run_http, daemon=True).start()
 
-    logging.info("📦 Initializing database...")
-    Base.metadata.create_all(bind=engine)
+    async def on_startup():
+        logging.info("📦 Initializing DB...")
+        Base.metadata.create_all(bind=engine)
 
-    logging.info("🕰️ Launching scheduler...")
-    setup_scheduler(bot)
+        logging.info("🕰️ Launching scheduler...")
+        setup_scheduler(bot)
 
-    logging.info("🤖 Bot is starting...")
-    asyncio.get_event_loop().run_until_complete(bot.delete_webhook())
+        logging.info("🧹 Cleaning webhook (precaution)...")
+        await bot.delete_webhook()
 
     try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(on_startup())
+
+        logging.info("🤖 Starting bot polling...")
         executor.start_polling(dp, skip_updates=True)
     except Exception as e:
-        logging.critical(f"❌ Bot crashed with error: {e}")
+        logging.critical(f"❌ BOT CRASHED: {e}")
