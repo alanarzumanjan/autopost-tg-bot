@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from aiogram import Bot, Dispatcher, executor
 from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
@@ -33,8 +34,17 @@ dp = Dispatcher(bot, storage=storage)
 
 register_start_handler(dp)
 
+
+async def main():
+    # Создание таблиц в БД
+    Base.metadata.create_all(bind=engine)
+
+    # Запуск планировщика
+    setup_scheduler(bot)
+
+    await dp.start_polling(bot, drop_pending_updates=True)
+
+
 if __name__ == "__main__":
     threading.Thread(target=run_http).start()
-    Base.metadata.create_all(bind=engine)  # init db
-    setup_scheduler(bot)  # start planning
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
