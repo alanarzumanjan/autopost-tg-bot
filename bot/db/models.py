@@ -29,6 +29,10 @@ class User(Base):
     subscription_level = Column(
         String, default="free"
     )  # free / basic / pro / unlimited
+    registration_step = Column(
+        String, default=None
+    )  # 'awaiting_tariff', 'awaiting_channel', None
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     channels = relationship("UserChannel", back_populates="user")
