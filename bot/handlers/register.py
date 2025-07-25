@@ -65,3 +65,41 @@ async def tariff_chosen(callback: types.CallbackQuery):
         f"✅ Тариф <b>{tariff}</b> выбран.\nТеперь отправьте @username вашего канала.",
         parse_mode="HTML",
     )
+
+
+async def channel_received(message: types.Message):
+    user_id = message.from_user.id
+    db = SessionLocal()
+    user = db.query(User).filter_by(tg_if=user_id).first()
+
+    if not user or user.registration_step != "awaiting_channel":
+        db.close()
+        return
+
+    channel_id = message.text.strip()
+
+    existing = db.query(UserChannel).filter_by(tg_channel_id=channel_id).first()
+    if existing:
+        await message.answer("⚠️ Этот канал уже зарегистрирован кем-то другим.")
+        db.close()
+        return
+
+    new_channel = UserChannel(
+        user_id=user.id, tg_channel_id=channel_id, title=channel_id, is_active=True
+    )
+    db.add(new_channel)
+
+    user.registration_step = None  # Registation is done
+    db.commit()
+    db.close()
+
+    await message.answer(
+        f"✅ Канал <b>{channel_id}</b> зарегистрирован!\nТеперь вы можете использовать /addprompt для настройки промта.",
+        parse_mode="HTML",
+    )
+
+
+def register_handler(dp: Dispatcher):
+    dp.register_message_handler(register_autogen, commands=["register_autogen"])
+    dp.register_callback_query_handler(tariff_chosen, Text(startswith="tariff_"))
+    dp.register_message_handler(channel_received, content_types=types.ContentType.TEXT)
