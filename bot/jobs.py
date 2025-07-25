@@ -8,7 +8,7 @@ from pytz import timezone
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler()
 
-    # First post in Morning
+    # Morning post
     scheduler.add_job(
         publish_scheduled_post,
         CronTrigger(hour=9, minute=00, timezone=timezone("Europe/Moscow")),
@@ -16,15 +16,15 @@ def setup_scheduler(bot):
         name="Morning post",
     )
 
-    # Second post in midday
+    # Midday post
     scheduler.add_job(
         publish_scheduled_post,
-        CronTrigger(hour=15, minute=00, timezone=timezone("Europe/Moscow")),
+        CronTrigger(hour=14, minute=00, timezone=timezone("Europe/Moscow")),
         kwargs={"bot": bot},
         name="Midday post",
     )
 
-    # Third post in Evening
+    # Evening post
     scheduler.add_job(
         publish_scheduled_post,
         CronTrigger(hour=19, minute=00, timezone=timezone("Europe/Moscow")),
@@ -43,12 +43,6 @@ def setup_scheduler(bot):
     # scheduler.add_job(
     #     publish_scheduled_post,
     #     CronTrigger(hour=11, minute=00, timezone=timezone("Europe/Moscow")),
-    #     kwargs={"bot": bot},
-    #     name="Test post",
-    # )
-    # scheduler.add_job(
-    #     publish_scheduled_post,
-    #     CronTrigger(hour=12, minute=20, timezone=timezone("Europe/Moscow")),
     #     kwargs={"bot": bot},
     #     name="Test post",
     # )
