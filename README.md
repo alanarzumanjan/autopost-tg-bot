@@ -98,4 +98,11 @@ This Version is which works stably with all libraries and dependencies
     alembic revision --autogenerate -m "upgrade"
     alembic upgrade head
 ```
+
+**Database down -1:**
+
+```bash
+    alembic downgrade -1
+```
+
 ````

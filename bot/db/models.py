@@ -38,6 +38,7 @@ class UserChannel(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String)
+    custom_prompt = Column(Text, nullable=True)
     tg_channel_id = Column(String, unique=True)  # @username or chat_id
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -2,6 +2,8 @@ from aiogram import Bot
 from bot.db.crud import get_scheduled_post, mark_post_as_published, add_post
 from datetime import datetime
 from bot.generator.generator import generate_post
+from bot.db.session import SessionLocal
+from bot.db.models import UserChannel
 import re
 
 from bot.config import CHANNEL_ID
@@ -30,7 +32,11 @@ async def publish_scheduled_post(bot: Bot):
     if not post:
         print("📭 В базе нет готового поста. Пробуем сгенерировать...")
         try:
-            content = await generate_post(bot=bot)
+            db = SessionLocal()
+            channel = db.query(UserChannel).filter_by(tg_channel_id=CHANNEL_ID).first()
+            custom_prompt = channel.custom_prompt if channel else None
+            db.close()
+            content = await generate_post(bot=bot, custom_prompt=custom_prompt)
         except Exception as e:
             print(f"❌ Ошибка при обращении к OpenAI: {e}")
             return

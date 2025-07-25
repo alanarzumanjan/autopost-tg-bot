@@ -39,11 +39,16 @@ def pick_weighted_random_topic():
     return random.choice(group)
 
 
-async def generate_post(topic: str = None, bot: Bot = None) -> str:
+async def generate_post(
+    topic: str = None, bot: Bot = None, custom_prompt: str = None
+) -> str:
     if topic is None:
         topic = pick_weighted_random_topic()
 
-    prompt = f"""
+    prompt = (
+        custom_prompt
+        if custom_prompt
+        else f"""
     Ты — Telegram-бот, который публикует короткие и полезные посты на тему "{topic}". 
     Цель поста — дать читателю конкретную интересную/полезную идею, факт, приём или навык, который он может запомнить, обсудить или применить.
 
@@ -69,6 +74,7 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
 
     ❗Не используй HTML-теги, которые Telegram не поддерживает: <p>, <h1>, <ul>, <li>, <br>. Только <b>, <i>, <code>, <pre>, <a href="..."> и т.д.
     """
+    )
 
     for attempt in range(3):  # maximum 3 tryes
         try:
@@ -91,8 +97,9 @@ async def generate_post(topic: str = None, bot: Bot = None) -> str:
 
             print(f"\n📊 Потрачено токенов: {tokens}")
             with open("generation_log.txt", "a", encoding="utf-8") as log_file:
+                prompt_type = "CUSTOM" if custom_prompt else "DEFAULT"
                 log_file.write(
-                    f"{now} | {topic} | {tokens} токенов\n{content}\n{'-' * 60}\n"
+                    f"{now} | {topic} | {prompt_type} | {tokens} токенов\n{content}\n{'-' * 60}\n"
                 )
 
             return content
