@@ -57,3 +57,9 @@ class PostSend(Base):
 
     post = relationship("Post", back_populates="post_sends")
     channel = relationship("UserChannel", back_populates="sends")
+
+
+class UserGenLimit(Base):
+    __tablename__ = "user_gen_limits"
+    user_id = Column(Integer, primary_key=True)
+    count = Column(Integer, default=0)

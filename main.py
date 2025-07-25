@@ -11,6 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
+from bot.handlers.gen import register_gen_handler
 from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
 
@@ -41,6 +42,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 register_start_handler(dp)
+register_gen_handler(dp)
 
 if __name__ == "__main__":
     threading.Thread(target=run_http, daemon=True).start()
