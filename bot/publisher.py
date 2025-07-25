@@ -33,58 +33,69 @@ def clean_html(text: str) -> str:
 async def publish_scheduled_post(bot: Bot):
     print("🕓 Задача публикации запущена...")
 
-    post = get_scheduled_post()
+    db = SessionLocal()
+    channels = db.query(UserChannel).filter_by(is_active=True).all()
+    db.close()
 
-    if not post:
-        print("📭 В базе нет готового поста. Пробуем сгенерировать...")
-        try:
-            db = SessionLocal()
-            channel = db.query(UserChannel).filter_by(tg_channel_id=CHANNEL_ID).first()
-            custom_prompt = channel.custom_prompt if channel else None
-            db.close()
-            content = await generate_post(bot=bot, custom_prompt=custom_prompt)
-        except Exception as e:
-            print(f"❌ Ошибка при обращении к OpenAI: {e}")
+    if not channels:
+        print("📭 Нет активных каналов.")
+        return
+
+    async def publish_scheduled_post(bot: Bot):
+        print("🕓 Задача публикации запущена...")
+
+        db = SessionLocal()
+        channels = db.query(UserChannel).filter_by(is_active=True).all()
+        db.close()
+
+        if not channels:
+            print("📭 Нет активных каналов.")
             return
 
-        if content:
+        for channel in channels:
+            print(f"\n➡ Генерация поста для {channel.tg_channel_id}")
+
+            try:
+                content = await generate_post(
+                    bot=bot, custom_prompt=channel.custom_prompt
+                )
+            except Exception as e:
+                print(f"❌ Ошибка генерации для {channel.tg_channel_id}: {e}")
+                continue
+
+            if not content:
+                print("❌ Пустой результат генерации.")
+                continue
+
             post = add_post(
                 title="AI generated",
                 content=content,
                 scheduled_for=datetime.utcnow(),
                 is_ai_generated=True,
             )
-            print("✅ Пост успешно сгенерирован и сохранён.")
-        else:
-            print("❌ Не удалось сгенерировать пост (пустой ответ).")
-            return
 
-    should_post = False
-    if not post.scheduled_for:
-        should_post = True
-    else:
-        now = datetime.utcnow()
-        scheduled_naive = post.scheduled_for.replace(tzinfo=None)
-        should_post = scheduled_naive <= now
-        print(
-            f"⏱ scheduled_for = {scheduled_naive}, now = {now}, ready = {should_post}"
-        )
-
-    if should_post:
-        if was_post_sent(post.id, channel.id):
-            print(
-                f"⏩ Пост {post.id} уже был отправлен в канал {channel.tg_channel_id}. Пропускаем."
+            should_post = (
+                not post.scheduled_for
+                or post.scheduled_for.replace(tzinfo=None) <= datetime.utcnow()
             )
-            return
 
-        try:
-            cleaned = clean_html(post.content)
-            print("📨 Отправка сообщения в канал...")
-            await bot.send_message(CHANNEL_ID, cleaned, parse_mode="HTML")
-            mark_post_as_published(post.id)
-            record_post_send(post.id, channel.id)
-            print(f"✅ Пост опубликован и записан: {post.title}")
-        except Exception as e:
-            print(f"❌ Ошибка отправки поста: {e}")
-    else:
-        print("⏳ Время публикации ещё не наступило.")
+            if was_post_sent(post.id, channel.id):
+                print(
+                    f"⏩ Пост {post.id} уже отправлен в {channel.tg_channel_id}. Пропускаем."
+                )
+                continue
+
+            if should_post:
+                try:
+                    cleaned = clean_html(post.content)
+                    print(f"📨 Отправка в {channel.tg_channel_id}...")
+                    await bot.send_message(
+                        channel.tg_channel_id, cleaned, parse_mode="HTML"
+                    )
+                    mark_post_as_published(post.id)
+                    record_post_send(post.id, channel.id)
+                    print(f"✅ Успешно отправлен и записан.")
+                except Exception as e:
+                    print(f"❌ Ошибка при отправке в {channel.tg_channel_id}: {e}")
+            else:
+                print(f"⏳ Время публикации для {channel.tg_channel_id} ещё не пришло.")
