@@ -8,6 +8,7 @@
 ## 🛠 Технологии
 
 ### Основной стек:
+
 - **Язык программирования**: Python 🐍
 - **Фреймворк для бота**: [aiogram](https://docs.aiogram.dev/en/latest/)
 - **Планировщик задач**: [APScheduler](https://apscheduler.readthedocs.io/en/latest/)
@@ -15,6 +16,7 @@
 - **База данных**: PostgreSQL 🐘
 
 ### Дополнительные библиотеки:
+
 - `requests` — для работы с HTTP-запросами
 - `aiohttp` — асинхронные запросы
 - `openai` — генерация текста с помощью GPT
@@ -31,7 +33,7 @@
 ## ☁️ Хостинг
 
 - **Бэкэнд и бот**: [Render](https://render.com/)
-- **Фронтенд (React)**: [Netlify](https://www.netlify.com/) *(возможно)*
+- **Фронтенд (React)**: [Netlify](https://www.netlify.com/) _(возможно)_
 - **Контейнеризация**: Docker 🐳
 
 ---
@@ -48,7 +50,7 @@
 
 ## 🚧 Структура проекта (план)
 
-```bash
+````bash
 project/
 ├── bot/
 │   ├── handlers/
@@ -66,3 +68,41 @@ project/
 ├── requirements.txt
 ├── .env
 └── README.md
+
+## Dependences:
+
+Need to install python 3.11 and click - `Add To System PATH`
+
+👉 [python version 3.11](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe)
+
+This Version is which works stably with all libraries and dependencies
+
+**Upload dependences:**
+
+```bash
+    # check version
+    py -3.11 --version
+
+    # Create virtual environment(important)
+    py -3.11 -m venv venv
+    .\venv\Scripts\activate # (for PowerShell)
+
+    # Start downloading dependences
+    pip install -r requirements.txt
+
+```
+
+**Database upgrade:**
+
+```bash
+    alembic revision --autogenerate -m "upgrade"
+    alembic upgrade head
+```
+
+**Database down -1:**
+
+```bash
+    alembic downgrade -1
+```
+
+````
