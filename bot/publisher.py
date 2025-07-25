@@ -1,5 +1,11 @@
 from aiogram import Bot
-from bot.db.crud import get_scheduled_post, mark_post_as_published, add_post
+from bot.db.crud import (
+    get_scheduled_post,
+    mark_post_as_published,
+    add_post,
+    was_post_sent,
+    record_post_send,
+)
 from datetime import datetime
 from bot.generator.generator import generate_post
 from bot.db.session import SessionLocal
@@ -65,12 +71,19 @@ async def publish_scheduled_post(bot: Bot):
         )
 
     if should_post:
+        if was_post_sent(post.id, channel.id):
+            print(
+                f"⏩ Пост {post.id} уже был отправлен в канал {channel.tg_channel_id}. Пропускаем."
+            )
+            return
+
         try:
             cleaned = clean_html(post.content)
             print("📨 Отправка сообщения в канал...")
             await bot.send_message(CHANNEL_ID, cleaned, parse_mode="HTML")
             mark_post_as_published(post.id)
-            print(f"✅ Пост опубликован: {post.title}")
+            record_post_send(post.id, channel.id)
+            print(f"✅ Пост опубликован и записан: {post.title}")
         except Exception as e:
             print(f"❌ Ошибка отправки поста: {e}")
     else:
