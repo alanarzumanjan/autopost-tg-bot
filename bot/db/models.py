@@ -26,7 +26,9 @@ class User(Base):
     full_name = Column(String, nullable=True)
     username = Column(String, nullable=True)
     is_admin = Column(Boolean, default=False)
-    subscription_level = Column(String, default="free")  # free / basic / pro
+    subscription_level = Column(
+        String, default="free"
+    )  # free / basic / pro / unlimited
     created_at = Column(DateTime, default=datetime.utcnow)
 
     channels = relationship("UserChannel", back_populates="user")
@@ -61,5 +63,7 @@ class PostSend(Base):
 
 class UserGenLimit(Base):
     __tablename__ = "user_gen_limits"
+
     user_id = Column(Integer, primary_key=True)
     count = Column(Integer, default=0)
+    last_reset = Column(DateTime, default=datetime.utcnow)

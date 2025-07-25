@@ -1,5 +1,5 @@
 from .session import SessionLocal
-from .models import Post, PostSend
+from .models import Post, PostSend, UserGenLimit
 from datetime import datetime, timezone
 
 
@@ -72,5 +72,40 @@ def record_post_send(post_id: int, channel_id: int):
         )
         db.add(send)
         db.commit()
+    finally:
+        db.close()
+
+
+def get_user_limit(user_id: int) -> int:
+    db = SessionLocal()
+    try:
+        limit = db.query(UserGenLimit).filter_by(user_id=user_id).first()
+        return limit.count if limit else 0
+    finally:
+        db.close()
+
+
+def increment_user_limit(user_id: int):
+    db = SessionLocal()
+    try:
+        limit = db.query(UserGenLimit).filter_by(user_id=user_id).first()
+        if limit:
+            limit.count += 1
+        else:
+            limit = UserGenLimit(user_id=user_id, count=1)
+            db.add(limit)
+        db.commit()
+    finally:
+        db.close()
+
+
+def reset_all_limits():
+    db = SessionLocal()
+    try:
+        db.query(UserGenLimit).update(
+            {UserGenLimit.count: 0, UserGenLimit.last_reset: datetime.utcnow()}
+        )
+        db.commit()
+        print("🔁 Все лимиты в БД обнулены.")
     finally:
         db.close()

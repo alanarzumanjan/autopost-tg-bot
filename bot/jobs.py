@@ -1,7 +1,7 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from bot.publisher import publish_scheduled_post
-from bot.handlers.gen import reset_generation_limits
+from bot.db.crud import reset_all_limits
 from pytz import timezone
 
 
@@ -34,7 +34,7 @@ def setup_scheduler(bot):
 
     # Reset Users /gen limits
     scheduler.add_job(
-        reset_generation_limits,
+        reset_all_limits,
         CronTrigger(hour=0, minute=0, timezone=timezone("Europe/Moscow")),
         name="Reset /gen limits",
     )
