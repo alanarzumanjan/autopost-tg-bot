@@ -5,7 +5,7 @@ from bot.db.models import User, UserChannel
 import re
 import json
 
-TARIFF_LIMITS = {"free": 1, "basic": 2, "pro": 3, "unlimited": 10}
+TARIFF_LIMITS = {"free": 1, "basic": 2, "pro": 5, "unlimited": 10}
 
 
 def is_valid_time_format(time_str):

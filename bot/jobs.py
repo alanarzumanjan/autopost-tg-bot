@@ -4,6 +4,7 @@ import json
 from bot.publisher import publish_scheduled_post
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
 def setup_scheduler(bot):
