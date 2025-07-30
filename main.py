@@ -13,6 +13,9 @@ from bot.config import BOT_TOKEN
 from bot.handlers.start import register_start_handler
 from bot.handlers.gen import register_gen_handler
 from bot.handlers.register import register_handler
+from bot.handlers.addpromt import register_addprompt_handler
+from bot.handlers.status import register_status_handler
+
 from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
 
@@ -45,6 +48,8 @@ dp = Dispatcher(bot, storage=storage)
 register_start_handler(dp)
 register_gen_handler(dp)
 register_handler(dp, bot)
+register_addprompt_handler(dp)
+register_status_handler(dp)
 
 if __name__ == "__main__":
     threading.Thread(target=run_http, daemon=True).start()
