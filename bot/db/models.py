@@ -35,7 +35,9 @@ class User(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    channels = relationship("UserChannel", back_populates="user")
+    channels = relationship(
+        "UserChannel", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserChannel(Base):
@@ -50,7 +52,9 @@ class UserChannel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="channels")
-    sends = relationship("PostSend", back_populates="channel")
+    sends = relationship(
+        "PostSend", back_populates="channel", cascade="all, delete-orphan"
+    )
 
 
 class PostSend(Base):

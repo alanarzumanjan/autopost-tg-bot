@@ -16,6 +16,7 @@ from bot.handlers.register import register_handler
 from bot.handlers.addpromt import register_addprompt_handler
 from bot.handlers.status import register_status_handler
 from bot.handlers.settarif import register_settariff_handler
+from bot.handlers.deletechannel import register_deletechannel_handler
 
 from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
@@ -52,6 +53,7 @@ register_handler(dp, bot)
 register_addprompt_handler(dp)
 register_status_handler(dp)
 register_settariff_handler(dp)
+register_deletechannel_handler(dp)
 
 if __name__ == "__main__":
     threading.Thread(target=run_http, daemon=True).start()
