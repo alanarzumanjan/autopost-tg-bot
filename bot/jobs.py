@@ -1,50 +1,37 @@
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
+from bot.db.session import SessionLocal
+from bot.db.models import UserChannel
+import json
 from bot.publisher import publish_scheduled_post
-from bot.db.crud import reset_all_limits
+from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
 
 
 def setup_scheduler(bot):
     scheduler = AsyncIOScheduler()
 
-    # Morning post
-    scheduler.add_job(
-        publish_scheduled_post,
-        CronTrigger(hour=9, minute=00, timezone=timezone("Europe/Moscow")),
-        kwargs={"bot": bot},
-        name="Morning post",
-    )
+    db = SessionLocal()
+    channels = db.query(UserChannel).filter_by(is_active=True).all()
+    db.close()
 
-    # Midday post
-    scheduler.add_job(
-        publish_scheduled_post,
-        CronTrigger(hour=14, minute=00, timezone=timezone("Europe/Moscow")),
-        kwargs={"bot": bot},
-        name="Midday post",
-    )
+    for channel in channels:
+        if hasattr(channel, "get_post_times"):
+            times = channel.get_post_times()
+        else:
+            times = channel.post_times or []
 
-    # Evening post
-    scheduler.add_job(
-        publish_scheduled_post,
-        CronTrigger(hour=19, minute=00, timezone=timezone("Europe/Moscow")),
-        kwargs={"bot": bot},
-        name="Evening post",
-    )
-
-    # Reset Users /gen limits
-    scheduler.add_job(
-        reset_all_limits,
-        CronTrigger(hour=0, minute=0, timezone=timezone("Europe/Moscow")),
-        name="Reset /gen limits",
-    )
-
-    # Test
-    # scheduler.add_job(
-    #     publish_scheduled_post,
-    #     CronTrigger(hour=11, minute=00, timezone=timezone("Europe/Moscow")),
-    #     kwargs={"bot": bot},
-    #     name="Test post",
-    # )
+        for idx, t in enumerate(times):
+            try:
+                hour, minute = map(int, t.split(":"))
+                scheduler.add_job(
+                    publish_scheduled_post,
+                    CronTrigger(
+                        hour=hour, minute=minute, timezone=timezone("Europe/Moscow")
+                    ),
+                    kwargs={"bot": bot},
+                    name=f"{channel.tg_channel_id}_{t}",
+                )
+                print(f"🕒 План публикации: {channel.tg_channel_id} в {t}")
+            except Exception as e:
+                print(f"❌ Ошибка планирования для {channel.tg_channel_id}: {e}")
 
     scheduler.start()

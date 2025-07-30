@@ -31,25 +31,29 @@ topic_weights = {
 }
 
 
-def pick_weighted_random_topic():
-    group_name = random.choices(
-        list(topic_weights.keys()), weights=topic_weights.values()
-    )[0]
-    group = all_topic_groups[group_name]
-    return random.choice(group)
-
-
 async def generate_post(
-    topic: str = None, bot: Bot = None, custom_prompt: str = None
+    topic: str = None,
+    bot: Bot = None,
+    custom_prompt: str = None,
+    template: str = "smart",
 ) -> str:
-    if topic is None:
-        topic = pick_weighted_random_topic()
+    template_hint = ""
+
+    if template == "bold":
+        template_hint = "Пиши с уверенностью, чуть дерзко. Не бойся бросать вызовы."
+    elif template == "educational":
+        template_hint = "Структурируй текст, давай конкретные знания. Можно ссылаться на кейсы или исследования."
+    elif template == "twitter":
+        template_hint = "Пиши коротко, цепко. Каждое предложение как твит."
+    elif template == "story":
+        template_hint = "Пиши через короткие истории или примеры из жизни."
 
     prompt = (
         custom_prompt
         if custom_prompt
         else f"""
     Ты — Telegram-бот, который публикует короткие и полезные посты на тему "{topic}". 
+    {template_hint}
     Цель поста — дать читателю конкретную интересную/полезную идею, факт, приём или навык, который он может запомнить, обсудить или применить.
 
     Формат:

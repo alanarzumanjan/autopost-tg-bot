@@ -18,6 +18,11 @@ from bot.handlers.status import register_status_handler
 from bot.handlers.settarif import register_settariff_handler
 from bot.handlers.deletechannel import register_deletechannel_handler
 from bot.handlers.deleteaccount import register_deleteaccount_handler
+from bot.handlers.settimes import register_settimes_handler
+from bot.handlers.pause_resume import register_pause_resume_handlers
+from bot.handlers.settemplate import register_settemplate_handler
+from bot.handlers.templates import register_templates_handler
+from bot.handlers.previewtemplate import register_previewtemplate_handler
 
 from bot.db.session import Base, engine
 from bot.jobs import setup_scheduler
@@ -56,6 +61,11 @@ register_status_handler(dp)
 register_settariff_handler(dp)
 register_deletechannel_handler(dp)
 register_deleteaccount_handler(dp)
+register_settimes_handler(dp)
+register_pause_resume_handlers(dp)
+register_settemplate_handler(dp)
+register_templates_handler(dp)
+register_previewtemplate_handler(dp)
 
 if __name__ == "__main__":
     threading.Thread(target=run_http, daemon=True).start()

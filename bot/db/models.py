@@ -51,6 +51,7 @@ class UserChannel(Base):
     tg_channel_id = Column(String, unique=True)  # @username or chat_id
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    template = Column(String, default="smart")
 
     user = relationship("User", back_populates="channels")
     sends = relationship(
