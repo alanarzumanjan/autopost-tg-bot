@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Foreign
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .session import Base
+from sqlalchemy import ARRAY
 
 
 class Post(Base):
@@ -55,6 +56,9 @@ class UserChannel(Base):
     sends = relationship(
         "PostSend", back_populates="channel", cascade="all, delete-orphan"
     )
+
+    post_times = Column(ARRAY(String), default=[])  # ["09:00", "15:30"]
+    posts_per_day = Column(Integer, default=1)
 
 
 class PostSend(Base):

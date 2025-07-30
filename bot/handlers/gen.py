@@ -4,7 +4,7 @@ from bot.generator.generator import generate_post
 from bot.db.crud import get_user_limit, increment_user_limit
 
 
-max_gen_per_user = 5
+max_gen_per_user = 3
 
 
 async def gen_handler(message: types.Message):
@@ -18,7 +18,7 @@ async def gen_handler(message: types.Message):
 
     count = get_user_limit(user_id)
     if count >= max_gen_per_user:
-        await message.reply("🚫 Вы достигли лимита генераций (5). Попробуйте завтра.")
+        await message.reply("🚫 Вы достигли лимита генераций (3). Попробуйте завтра.")
         return
 
     await message.reply("⏳ Генерирую пост...")

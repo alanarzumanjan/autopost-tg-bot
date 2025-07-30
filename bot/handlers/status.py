@@ -6,8 +6,8 @@ from bot.db.models import User, UserChannel, UserGenLimit
 # Для простоты ограничение по тарифу захардкожим:
 TARIFF_LIMITS = {
     "free": 5,
-    "basic": 20,
-    "pro": 100,
+    "basic": 10,
+    "pro": 20,
 }
 
 
