@@ -44,7 +44,7 @@ dp = Dispatcher(bot, storage=storage)
 
 register_start_handler(dp)
 register_gen_handler(dp)
-register_handler(dp)
+register_handler(dp, bot)
 
 if __name__ == "__main__":
     threading.Thread(target=run_http, daemon=True).start()
