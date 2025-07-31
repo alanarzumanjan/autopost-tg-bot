@@ -1,3 +1,4 @@
+import logging
 from bot.db.session import SessionLocal
 from bot.db.models import UserChannel
 import json
@@ -28,9 +29,11 @@ def setup_scheduler(bot):
                     CronTrigger(
                         hour=hour, minute=minute, timezone=timezone("Europe/Moscow")
                     ),
-                    kwargs={"bot": bot},
+                    kwargs={"bot": bot, "channel": channel},
                     name=f"{channel.tg_channel_id}_{t}",
                 )
+                scheduler._logger = logging.getLogger("apscheduler")
+
                 print(f"🕒 План публикации: {channel.tg_channel_id} в {t}")
             except Exception as e:
                 print(f"❌ Ошибка планирования для {channel.tg_channel_id}: {e}")
