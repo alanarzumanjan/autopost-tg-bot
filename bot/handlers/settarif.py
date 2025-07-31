@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import Dispatcher
 from bot.db.session import SessionLocal
 from bot.db.models import User
-from bot.config import PAYMENT_PROVIDER_TEST
+from bot.config import PAYMENT_PROVIDER
 
 # 💰 Тарифы и цены (в евро * 100)
 TARIFFS = {
@@ -34,7 +34,7 @@ async def settariff_handler(message: types.Message):
         title=f"Тариф: {selected['title']}",
         description=selected["desc"],
         payload=f"tariff_{args}",
-        provider_token=PAYMENT_PROVIDER_TEST,
+        provider_token=PAYMENT_PROVIDER,
         currency=CURRENCY,
         prices=prices,
         start_parameter="settariff-payment",
