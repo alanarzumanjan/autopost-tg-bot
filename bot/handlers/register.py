@@ -120,7 +120,7 @@ async def channel_received(message: types.Message, bot: Bot):
     db.close()
 
     await message.answer(
-        f"✅ Канал <b>{channel_title}</b> (@{tg_channel_id}) зарегистрирован!\n"
+        f"✅ Канал <b>{channel_title}</b> ({tg_channel_id}) зарегистрирован!\n"
         f"Теперь вы можете использовать /addprompt для настройки промта.",
         parse_mode="HTML",
     )
