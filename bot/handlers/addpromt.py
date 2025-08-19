@@ -7,6 +7,7 @@ from bot.db.models import User, UserChannel
 async def addprompt_handler(message: types.Message):
     user_id = message.from_user.id
     args = message.get_args().strip()
+    print(f"👉 /addprompt вызван пользователем {user_id} с аргументами: {args}")
 
     if not args or "@" not in args or " " not in args:
         await message.reply(

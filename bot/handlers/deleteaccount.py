@@ -10,6 +10,7 @@ pending_account_deletion = set()
 
 async def deleteaccount_handler(message: types.Message):
     user_id = message.from_user.id
+    print(f"👉 /deleteaccount вызван пользователем {user_id}")
 
     keyboard = InlineKeyboardMarkup().add(
         InlineKeyboardButton(

@@ -20,6 +20,7 @@ async def register_autogen(message: types.Message):
     user_id = message.from_user.id
     db = SessionLocal()
     user = db.query(User).filter_by(tg_id=user_id).first()
+    print(f"👉 /register_autogen вызван пользователем {user_id}")
 
     if not user:
         user = User(tg_id=user_id, registration_step="awaiting_tariff")

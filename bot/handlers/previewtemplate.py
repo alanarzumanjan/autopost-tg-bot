@@ -7,6 +7,7 @@ VALID_TEMPLATES = ["smart", "bold", "educational", "twitter", "story"]
 
 async def previewtemplate_handler(message: types.Message):
     args = message.get_args().strip().lower()
+    print(f"👉 /previewtemplate вызван пользователем с аргументами: {args}")
 
     if not args or args not in VALID_TEMPLATES:
         await message.reply(

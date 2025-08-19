@@ -11,6 +11,7 @@ pending_deletions = {}
 async def deletechannel_handler(message: types.Message):
     user_id = message.from_user.id
     args = message.get_args().strip()
+    print(f"👉 /deletechannel вызван пользователем {user_id} с аргументами: {args}")
 
     if not args or not args.startswith("@"):
         await message.reply(

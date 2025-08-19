@@ -15,6 +15,9 @@ async def gen_handler(message: types.Message):
     user_id = message.from_user.id
     text = message.get_args().strip()
     custom_prompt = text if text else None
+    print(
+        f"👉 /gen вызван пользователем {user_id} с аргументами: {text}, {custom_prompt}"
+    )
 
     count = get_user_limit(user_id)
     if count >= max_gen_per_user:

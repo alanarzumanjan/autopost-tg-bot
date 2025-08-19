@@ -15,6 +15,7 @@ async def resumechannel_handler(message: types.Message):
 async def toggle_channel_status(message: types.Message, active: bool):
     user_id = message.from_user.id
     args = message.get_args().strip()
+    print(f"👉 /pauseresume вызван пользователем {user_id} с аргументами: {args}")
 
     if not args or not args.startswith("@"):
         await message.reply(
